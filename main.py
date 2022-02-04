@@ -20,10 +20,10 @@ if __name__ == "__main__":
         args.idoklad_client_id,
         args.idoklad_client_secret,
     )
-    idoklad = IDokladAPI(idoklad_oauth_client)
+    idoklad = IDokladAPI(idoklad_oauth_client, args.idoklad_filter)
     idoklad_invoices = idoklad.get_invoices()
     idoklad_expenses = idoklad.get_expenses()
-
+    
     print("\n")
 
     try:

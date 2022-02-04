@@ -2,8 +2,9 @@ import requests
 
 from constants import ERROR_MESSAGES
 
+
 class IDokladAPI(object):
-    def __init__(self, oauth_client):
+    def __init__(self, oauth_client, filter):
         self.session = requests.Session()
         self.session.headers.update(
             {
@@ -13,9 +14,15 @@ class IDokladAPI(object):
                 "Accept": "application/json",
             }
         )
+        self.filter = filter
         self.api_url = "https://api.idoklad.cz/v2"
 
-    def get_records(self, path, type, pagesize=20):
+    def get_records(self, path, type):
+        if self.filter:
+            path += "?filter={}".format(self.filter)
+
+        page_search_param_prefix = "&" if self.filter else "?"
+
         total_pages = 1
         page = 1
         result = []
@@ -23,10 +30,11 @@ class IDokladAPI(object):
         print("--- iDoklad - loading {} invoices".format(type))
 
         while page <= total_pages:
-            whole_path = "/{path}?page={page}&pagesize={pagesize}".format(
+            whole_path = "/{path}{page_search_param_prefix}page={page}&pagesize={pagesize}".format(
+                page_search_param_prefix=page_search_param_prefix,
                 path=path,
                 page=page,
-                pagesize=pagesize
+                pagesize=50
             )
 
             print("Loading page {}".format(page))
@@ -58,7 +66,7 @@ class IDokladAPI(object):
         return result
 
     def get_invoices(self):
-        return self.get_records("IssuedInvoices/Expand", "issued", 100)
+        return self.get_records("IssuedInvoices/Expand", "issued")
 
     def get_expenses(self):
         return self.get_records("ReceivedInvoices/Expand", "received")

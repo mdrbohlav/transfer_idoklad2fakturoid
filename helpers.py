@@ -38,6 +38,11 @@ def parseargs():
                         dest="idoklad_client_secret",
                         required=True,
                         help="iDoklad client secret")
+    parser.add_argument("--idoklad-filter",
+                        type=str,
+                        metavar="FILTER",
+                        dest="idoklad_filter",
+                        help="iDoklad filter")
     return parser.parse_args(sys.argv[1:])
 
 
