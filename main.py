@@ -7,7 +7,7 @@
 import pickle
 
 from constants import CACHE_FILE
-from helpers import parseargs, record_already_transfered, process_record
+from helpers import parseargs, record_already_transfered, fakturoid_vat_matches_record_vat_or_continue, process_record
 from idoklad_oauth2_client import IDokladOAuth2Client
 from idoklad_api import IDokladAPI
 from fakturoid_api import FakturoidAPI
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     idoklad = IDokladAPI(idoklad_oauth_client, args.idoklad_filter)
     idoklad_invoices = idoklad.get_invoices()
     idoklad_expenses = idoklad.get_expenses()
-    
+
     print("\n")
 
     try:
@@ -41,7 +41,13 @@ if __name__ == "__main__":
             "bank_accounts": {},
         }
 
-    cache_keys = ["invoices", "expenses", "subjects", "bank_accounts"]
+    cache_keys = [
+        "account",
+        "invoices",
+        "expenses",
+        "subjects",
+        "bank_accounts",
+    ]
 
     for key in cache_keys:
         if not key in cache:
@@ -54,6 +60,7 @@ if __name__ == "__main__":
         args.fakturoid_email,
         args.fakturoid_api_key,
     )
+    fakturoid_account = fakturoid.get_account(cache["account"])
     fakturoid_invoices = fakturoid.get_invoices(cache["invoices"])
     fakturoid_expenses = fakturoid.get_expenses(cache["expenses"])
     fakturoid_subjects = fakturoid.get_subjects(cache["subjects"])
@@ -77,6 +84,16 @@ if __name__ == "__main__":
             )
 
             continue
+
+        vat_numbers_match_or_continue = fakturoid_vat_matches_record_vat_or_continue(
+            fakturoid_account["vat_no"],
+            idoklad_invoice["MyCompanyDocumentAddress"]["VatIdentificationNumber"],
+            idoklad_invoice["DocumentNumber"],
+            "invoice",
+        )
+
+        if not vat_numbers_match_or_continue:
+            break
 
         result = process_record(
             idoklad,
@@ -103,6 +120,16 @@ if __name__ == "__main__":
 
             continue
 
+        vat_numbers_match_or_continue = fakturoid_vat_matches_record_vat_or_continue(
+            fakturoid_account["vat_no"],
+            idoklad_invoice["MyCompanyDocumentAddress"]["VatIdentificationNumber"],
+            idoklad_invoice["DocumentNumber"],
+            "expense",
+        )
+
+        if not vat_numbers_match_or_continue:
+            break
+
         result = process_record(
             idoklad,
             idoklad_expense,
@@ -117,7 +144,7 @@ if __name__ == "__main__":
             fakturoid_subjects.append(result["fakturoid_subject"])
 
         fakturoid_expenses.append(result["fakturoid_record"])
-    
+
     print(
         "\nCreated {invoices} invoices and {expenses} expenses".format(
             invoices=created_invoices,

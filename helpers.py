@@ -201,6 +201,29 @@ def record_already_transfered(fakturoid_records, idoklad_number):
 
     return False
 
+def fakturoid_vat_matches_record_vat_or_continue(
+    fakturoid_vat_no,
+    record_vat_no,
+    record_number,
+    type,
+):
+    if fakturoid_vat_no == record_vat_no:
+        return True
+    
+    print(
+        "\nWARNING: Your Fakturoid VAT Number ({fakturoid_vat_no}) does not match the iDoklad {type} ({idoklad_invoice_number}) VAT Number ({idoklad_vat_no}). You can change it in the web app.".format(
+            fakturoid_vat_no=fakturoid_vat_no,
+            type=type,
+            record_invoice_number=record_number,
+            record_vat_no=record_vat_no,
+        )
+    )
+
+    if input("Do you want to continue anyway? [y/n]") == "y":
+        return True
+
+    return False
+
 
 def process_record(
     idoklad,

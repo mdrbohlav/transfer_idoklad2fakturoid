@@ -17,6 +17,55 @@ class FakturoidAPI(object):
             slug=account_name,
         )
 
+    def get_account(self, cache):
+        cache_headers = {
+            "ETag": "If-None-Match",
+            "Last-Modified": "If-Modified-Since",
+        }
+        headers = {}
+        result = {}
+
+        print("--- Fakturoid - loading account")
+
+        if "headers" in cache:
+            headers = cache["headers"]
+        else:
+            cache["headers"] = {}
+
+        path = "/account.json"
+        response = self._api_get(path=path, headers=headers)
+
+        for header_key in cache_headers:
+            if header_key in response.headers:
+                cache["headers"][cache_headers[header_key]] = response.headers[header_key]
+
+        while True:
+            if response.status_code == 200 or response.status_code == 304:
+                if response.status_code == 200:
+                    result = response.json()
+                    cache["data"] = result
+
+                    break
+                elif "data" in cache:
+                    print("Cache hit")
+
+                    result = cache["data"]
+
+                    break
+                else:
+                    print("Cache miss, reload account")
+
+                    headers["If-None-Match"] = "W/\"reload\""
+            else:
+                raise Exception(
+                    ERROR_MESSAGES["request_failed"].format(
+                        "GET", path, response.status_code, response.text
+                    ),
+                )
+
+        return result
+
+
     def get_records(self, cache, cache_headers, type, path):
         headers = {}
         total_pages = 1
