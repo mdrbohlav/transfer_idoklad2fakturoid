@@ -85,6 +85,7 @@ if __name__ == "__main__":
             fakturoid_bank_accounts,
             fakturoid_invoices,
             "invoice",
+            args.disable_vat_number_check,
         )
 
         if result == 'continue':
@@ -110,6 +111,7 @@ if __name__ == "__main__":
             fakturoid_bank_accounts,
             fakturoid_expenses,
             "expense",
+            args.disable_vat_number_check,
         )
 
         if result == 'continue':

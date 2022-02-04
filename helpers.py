@@ -42,7 +42,13 @@ def parseargs():
                         type=str,
                         metavar="FILTER",
                         dest="idoklad_filter",
-                        help="iDoklad filter")
+                        help="iDoklad filter, see https://api.idoklad.cz/Help/v2/ for more info")
+    parser.add_argument("--disable-vat-number-check",
+                        dest="disable_vat_number_check",
+                        default=False,
+                        action="store_true",
+                        help="Disable the vat number comaprison between Fakturoid account and each invoice/expense")
+
     return parser.parse_args(sys.argv[1:])
 
 
@@ -211,7 +217,7 @@ def fakturoid_vat_matches_record_vat_or_continue(
         return True
     
     print(
-        "\nWARNING: Your Fakturoid VAT Number ({fakturoid_vat_no}) does not match the iDoklad {type} ({idoklad_invoice_number}) VAT Number ({idoklad_vat_no}). You can change it in the web app.".format(
+        "\nWARNING: Your Fakturoid VAT Number ({fakturoid_vat_no}) does not match the iDoklad {type} ({record_invoice_number}) VAT Number ({record_vat_no}). You can change it in the web app.".format(
             fakturoid_vat_no=fakturoid_vat_no,
             type=type,
             record_invoice_number=record_number,
@@ -219,7 +225,9 @@ def fakturoid_vat_matches_record_vat_or_continue(
         )
     )
 
-    if input("Do you want to continue anyway? [y/n]") == "y":
+    answer = input("Do you want to continue anyway? [yes/no]: ")
+
+    if answer == "y" or answer == "yes":
         return True
 
     return False
@@ -234,6 +242,7 @@ def process_record(
     fakturoid_bank_accounts,
     fakturoid_records,
     type,
+    disable_vat_number_check,
 ):
     if not type == "invoice" and not type == "expense":
         raise Exception(
@@ -250,15 +259,16 @@ def process_record(
 
         return 'continue'
 
-    vat_numbers_match_or_continue = fakturoid_vat_matches_record_vat_or_continue(
-        fakturoid_account["vat_no"],
-        idoklad_record["MyCompanyDocumentAddress"]["VatIdentificationNumber"],
-        idoklad_record["DocumentNumber"],
-        type,
-    )
+    if not disable_vat_number_check:
+        vat_numbers_match_or_continue = fakturoid_vat_matches_record_vat_or_continue(
+            fakturoid_account["vat_no"],
+            idoklad_record["MyCompanyDocumentAddress"]["VatIdentificationNumber"],
+            idoklad_record["DocumentNumber"],
+            type,
+        )
 
-    if not vat_numbers_match_or_continue:
-        return 'break'
+        if not vat_numbers_match_or_continue:
+            return 'break'
 
     result = {}
     idoklad_subject_type = "Purchaser" if type == "invoice" else "Supplier"
