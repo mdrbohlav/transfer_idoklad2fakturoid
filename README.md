@@ -1,4 +1,4 @@
-# transfer_idoklad2fakturoid
+# transfer_idoklad2fakturoid
 Transfer invoices, expenses and contacts from iDoklad to Fakturoid.
 
 Usage:
