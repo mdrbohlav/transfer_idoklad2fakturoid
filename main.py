@@ -7,7 +7,7 @@
 import pickle
 
 from constants import CACHE_FILE
-from helpers import parseargs, record_already_transfered, fakturoid_vat_matches_record_vat_or_continue, process_record
+from helpers import parseargs, process_record
 from idoklad_oauth2_client import IDokladOAuth2Client
 from idoklad_api import IDokladAPI
 from fakturoid_api import FakturoidAPI
