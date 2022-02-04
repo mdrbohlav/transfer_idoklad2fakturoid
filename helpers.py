@@ -229,14 +229,36 @@ def process_record(
     idoklad,
     idoklad_record,
     fakturoid,
+    fakturoid_account,
     fakturoid_subjects,
     fakturoid_bank_accounts,
+    fakturoid_records,
     type,
 ):
     if not type == "invoice" and not type == "expense":
         raise Exception(
             ERROR_MESSAGES['unknown_record_type'].format(type)
         )
+    
+    if record_already_transfered(fakturoid_records, idoklad_record["DocumentNumber"]):
+        print(
+            "--- {type} number {number} already transfered".format(
+                type=type.capitalize(),
+                number=idoklad_record["DocumentNumber"],
+            )
+        )
+
+        return 'continue'
+
+    vat_numbers_match_or_continue = fakturoid_vat_matches_record_vat_or_continue(
+        fakturoid_account["vat_no"],
+        idoklad_record["MyCompanyDocumentAddress"]["VatIdentificationNumber"],
+        idoklad_record["DocumentNumber"],
+        type,
+    )
+
+    if not vat_numbers_match_or_continue:
+        return 'break'
 
     result = {}
     idoklad_subject_type = "Purchaser" if type == "invoice" else "Supplier"

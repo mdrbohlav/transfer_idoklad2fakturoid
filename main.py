@@ -76,33 +76,23 @@ if __name__ == "__main__":
     created_expenses = 0
 
     for idoklad_invoice in idoklad_invoices:
-        if record_already_transfered(fakturoid_invoices, idoklad_invoice["DocumentNumber"]):
-            print(
-                "--- Invoice number {} already transfered".format(
-                    idoklad_invoice["DocumentNumber"],
-                )
-            )
-
-            continue
-
-        vat_numbers_match_or_continue = fakturoid_vat_matches_record_vat_or_continue(
-            fakturoid_account["vat_no"],
-            idoklad_invoice["MyCompanyDocumentAddress"]["VatIdentificationNumber"],
-            idoklad_invoice["DocumentNumber"],
-            "invoice",
-        )
-
-        if not vat_numbers_match_or_continue:
-            break
-
         result = process_record(
             idoklad,
             idoklad_invoice,
             fakturoid,
+            fakturoid_account,
             fakturoid_subjects,
             fakturoid_bank_accounts,
+            fakturoid_invoices,
             "invoice",
         )
+
+        if result == 'continue':
+            continue
+
+        if result == 'break':
+            break
+
         created_invoices += 1
 
         if "fakturoid_subject" in result:
@@ -111,33 +101,23 @@ if __name__ == "__main__":
         fakturoid_invoices.append(result["fakturoid_record"])
 
     for idoklad_expense in idoklad_expenses:
-        if record_already_transfered(fakturoid_expenses, idoklad_expense["DocumentNumber"]):
-            print(
-                "--- Expense number {} already transfered".format(
-                    idoklad_expense["DocumentNumber"],
-                )
-            )
-
-            continue
-
-        vat_numbers_match_or_continue = fakturoid_vat_matches_record_vat_or_continue(
-            fakturoid_account["vat_no"],
-            idoklad_invoice["MyCompanyDocumentAddress"]["VatIdentificationNumber"],
-            idoklad_invoice["DocumentNumber"],
-            "expense",
-        )
-
-        if not vat_numbers_match_or_continue:
-            break
-
         result = process_record(
             idoklad,
             idoklad_expense,
             fakturoid,
+            fakturoid_account,
             fakturoid_subjects,
             fakturoid_bank_accounts,
+            fakturoid_expenses,
             "expense",
         )
+
+        if result == 'continue':
+            continue
+
+        if result == 'break':
+            break
+
         created_expenses += 1
 
         if "fakturoid_subject" in result:
