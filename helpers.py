@@ -7,7 +7,7 @@ from constants import PAYMENT_METHOD_IDOKLAD_TO_FAKTUROID, ERROR_MESSAGES
 def parseargs():
     parser = argparse.ArgumentParser(
         description="Import invoices, expenses and contacts from iDoklad to Fakturoid",
-        add_help=False)
+        add_help=True)
 
     parser.add_argument("--fakturoid-account",
                         type=str,
