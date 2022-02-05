@@ -71,6 +71,40 @@ class IDokladAPI(object):
     def get_expenses(self):
         return self.get_records("ReceivedInvoices/Expand", "received")
 
+    def get_pdf(self, type, id):
+        if type == "invoice":
+            return self.get_invoice_pdf(id)
+        elif type == "expense":
+            return self.get_expense_pdf(id)
+
+        return None
+
+    def get_invoice_pdf(self, id):
+        path = "IssuedInvoices/{}/GetPdf?language=1".format(id)
+        response = self._api_get("/" + path)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise Exception(
+                ERROR_MESSAGES["request_failed"].format(
+                    "GET", path, response.status_code, response.text
+                ),
+            )
+
+    def get_expense_pdf(self, id):
+        path = "ReceivedInvoices/{}/GetPdf?language=1".format(id)
+        response = self._api_get("/" + path)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            raise Exception(
+                ERROR_MESSAGES["request_failed"].format(
+                    "GET", path, response.status_code, response.text
+                ),
+            )
+
     def get_attachment(self, type, id):
         if type == "invoice":
             return self.get_invoice_attachment(id)

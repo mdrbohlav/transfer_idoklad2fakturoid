@@ -5,8 +5,10 @@
 # Check https://api.idoklad.cz/Help/v2/ and https://www.fakturoid.cz/api
 
 import pickle
+import os
+import base64
 
-from constants import CACHE_FILE
+from constants import CACHE_FILE, EXPORT_DIRECTORY, EXPORT_INVOICE_DIRECTORY, EXPORT_EXPENSE_DIRECTORY
 from helpers import parseargs, process_record
 from idoklad_oauth2_client import IDokladOAuth2Client
 from idoklad_api import IDokladAPI
@@ -94,6 +96,21 @@ if __name__ == "__main__":
         if result == 'break':
             break
 
+        if args.export_idoklad_as_pdf:
+            base64_idoklad_invoice = idoklad.get_invoice_pdf(
+                idoklad_invoice["Id"],
+            )
+            file_path = "{root_dir}/{type_dir}/{name}.pdf".format(
+                root_dir=EXPORT_DIRECTORY,
+                type_dir=EXPORT_INVOICE_DIRECTORY,
+                name=idoklad_invoice["DocumentNumber"],
+            )
+
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+            with open(file_path, "wb") as file:
+                file.write(base64.b64decode(base64_idoklad_invoice))
+
         created_invoices += 1
 
         if "fakturoid_subject" in result:
@@ -119,6 +136,21 @@ if __name__ == "__main__":
 
         if result == 'break':
             break
+
+        if args.export_idoklad_as_pdf:
+            base64_idoklad_expense = idoklad.get_expense_pdf(
+                idoklad_expense["Id"],
+            )
+            file_path = "{root_dir}/{type_dir}/{name}.pdf".format(
+                root_dir=EXPORT_DIRECTORY,
+                type_dir=EXPORT_EXPENSE_DIRECTORY,
+                name=idoklad_expense["DocumentNumber"],
+            )
+
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+            with open(file_path, "wb") as file:
+                file.write(base64.b64decode(base64_idoklad_expense))
 
         created_expenses += 1
 

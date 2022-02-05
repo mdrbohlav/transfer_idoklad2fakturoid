@@ -1,4 +1,7 @@
 CACHE_FILE = "transfer_idoklad2fakturoid.cache"
+EXPORT_DIRECTORY = "exports"
+EXPORT_INVOICE_DIRECTORY = "invoices"
+EXPORT_EXPENSE_DIRECTORY = "expenses"
 PAYMENT_METHOD_IDOKLAD_TO_FAKTUROID = {
     "B": "bank",
     "H": "cash",

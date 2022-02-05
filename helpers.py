@@ -48,6 +48,11 @@ def parseargs():
                         default=False,
                         action="store_true",
                         help="Disable the vat number comaprison between Fakturoid account and each invoice/expense")
+    parser.add_argument("--export-idoklad-as-pdf",
+                        dest="export_idoklad_as_pdf",
+                        default=False,
+                        action="store_true",
+                        help="Export iDoklad invoices and expenses as PDF files")
 
     return parser.parse_args(sys.argv[1:])
 
