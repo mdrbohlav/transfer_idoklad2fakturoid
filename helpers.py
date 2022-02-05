@@ -1,7 +1,9 @@
 import sys
 import argparse
+import os
+import base64
 
-from constants import PAYMENT_METHOD_IDOKLAD_TO_FAKTUROID, ERROR_MESSAGES
+from constants import PAYMENT_METHOD_IDOKLAD_TO_FAKTUROID, ERROR_MESSAGES, EXPORT_DIRECTORY, EXPORT_INVOICE_DIRECTORY, EXPORT_EXPENSE_DIRECTORY
 
 
 def parseargs():
@@ -213,6 +215,7 @@ def record_already_transfered(fakturoid_records, idoklad_number):
 
     return False
 
+
 def fakturoid_vat_matches_record_vat_or_continue(
     fakturoid_vat_no,
     record_vat_no,
@@ -221,7 +224,7 @@ def fakturoid_vat_matches_record_vat_or_continue(
 ):
     if fakturoid_vat_no == record_vat_no:
         return True
-    
+
     print(
         "\nWARNING: Your Fakturoid VAT Number ({fakturoid_vat_no}) does not match the iDoklad {type} ({record_invoice_number}) VAT Number ({record_vat_no}). You can change it in the web app.".format(
             fakturoid_vat_no=fakturoid_vat_no,
@@ -239,6 +242,19 @@ def fakturoid_vat_matches_record_vat_or_continue(
     return False
 
 
+def export_pdf(type, filename, base64_record):
+    file_path = "{root_dir}/{type_dir}/{filename}.pdf".format(
+        root_dir=EXPORT_DIRECTORY,
+        type_dir=EXPORT_INVOICE_DIRECTORY if type == 'invoice' else EXPORT_EXPENSE_DIRECTORY,
+        filename=filename,
+    )
+
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    with open(file_path, "wb") as file:
+        file.write(base64.b64decode(base64))
+
+
 def process_record(
     idoklad,
     idoklad_record,
@@ -249,12 +265,13 @@ def process_record(
     fakturoid_records,
     type,
     disable_vat_number_check,
+    export_idoklad_as_pdf,
 ):
     if not type == "invoice" and not type == "expense":
         raise Exception(
             ERROR_MESSAGES['unknown_record_type'].format(type)
         )
-    
+
     if record_already_transfered(fakturoid_records, idoklad_record["DocumentNumber"]):
         print(
             "--- {type} number {number} already transfered".format(
@@ -285,6 +302,15 @@ def process_record(
             number=idoklad_record["DocumentNumber"],
         )
     )
+
+    if export_idoklad_as_pdf:
+        base64_idoklad_record = idoklad.get_pdf(
+            type,
+            idoklad_record["Id"],
+        )
+
+        export_pdf(
+            type, idoklad_record["DocumentMumber"], base64_idoklad_record)
 
     record_fakturoid_attachment = None
 
@@ -361,9 +387,9 @@ def process_record(
         payload = {}
 
         if type == "invoice":
-            payload = { "paid_at": idoklad_record["DateOfPayment"] }
+            payload = {"paid_at": idoklad_record["DateOfPayment"]}
         else:
-            payload = { "paid_on": idoklad_record["DateOfPayment"] }
+            payload = {"paid_on": idoklad_record["DateOfPayment"]}
 
         fakturoid.pay_record(type, fakturoid_record["id"], payload)
 
