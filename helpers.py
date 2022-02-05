@@ -252,7 +252,7 @@ def export_pdf(type, filename, base64_record):
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
     with open(file_path, "wb") as file:
-        file.write(base64.b64decode(base64))
+        file.write(base64.b64decode(base64_record))
 
 
 def process_record(
@@ -312,7 +312,7 @@ def process_record(
         )
 
         export_pdf(
-            type, idoklad_record["DocumentMumber"], base64_idoklad_record)
+            type, idoklad_record["DocumentNumber"], base64_idoklad_record)
 
     record_fakturoid_attachment = None
 
