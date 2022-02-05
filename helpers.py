@@ -304,6 +304,8 @@ def process_record(
     )
 
     if export_idoklad_as_pdf:
+        print("Exporting as PDF")
+
         base64_idoklad_record = idoklad.get_pdf(
             type,
             idoklad_record["Id"],
