@@ -6,53 +6,54 @@ from constants import PAYMENT_METHOD_IDOKLAD_TO_FAKTUROID, ERROR_MESSAGES
 
 def parseargs():
     parser = argparse.ArgumentParser(
-        description="Import invoices from iDoklad to Fakturoid",
+        description="Import invoices, expenses and contacts from iDoklad to Fakturoid",
         add_help=False)
+
     parser.add_argument("--fakturoid-account",
                         type=str,
                         metavar="NAME",
                         dest="fakturoid_account_name",
                         required=True,
-                        help="Fakturoid account name")
+                        help="Your Fatkuroid account slug.")
     parser.add_argument("--fakturoid-email",
                         type=str,
                         metavar="EMAIL",
                         dest="fakturoid_email",
                         required=True,
-                        help="Fakturoid email address")
+                        help="Your Fakturoid e-mail.")
     parser.add_argument("--fakturoid-api-key",
                         type=str,
                         metavar="API_KEY",
                         dest="fakturoid_api_key",
                         required=True,
-                        help="Fakturoid API key")
+                        help="Your Fakturoid API key.")
     parser.add_argument("--idoklad-client-id",
                         type=str,
                         metavar="CLIENT_ID",
                         dest="idoklad_client_id",
                         required=True,
-                        help="iDoklad client ID")
+                        help="Your iDoklad Client ID.")
     parser.add_argument("--idoklad-client-secret",
                         type=str,
                         metavar="CLIENT_SECRET",
                         dest="idoklad_client_secret",
                         required=True,
-                        help="iDoklad client secret")
+                        help="Your iDoklad Client Secret.")
     parser.add_argument("--idoklad-filter",
                         type=str,
                         metavar="FILTER",
                         dest="idoklad_filter",
-                        help="iDoklad filter, see https://api.idoklad.cz/Help/v2/ for more info")
+                        help="Optional. iDoklad filter (eg. DateOfIssue~gt~2018-12-31). https://api.idoklad.cz/Help/v2/")
     parser.add_argument("--disable-vat-number-check",
                         dest="disable_vat_number_check",
                         default=False,
                         action="store_true",
-                        help="Disable the vat number comaprison between Fakturoid account and each invoice/expense")
+                        help="Optional. Disables the VAT number check for your Fakturoid account and each iDoklad invoice and expense.")
     parser.add_argument("--export-idoklad-as-pdf",
                         dest="export_idoklad_as_pdf",
                         default=False,
                         action="store_true",
-                        help="Export iDoklad invoices and expenses as PDF files")
+                        help="Optional. Export the iDoklad invoices and expenses as PDF.")
 
     return parser.parse_args(sys.argv[1:])
 
