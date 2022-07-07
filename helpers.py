@@ -149,6 +149,12 @@ def convert_invoice(
     fakturoid_attachment,
     fakturoid_bank_account_id,
 ):
+    language = "cz"
+    langauge_code = idoklad_invoice["LanguageCode"]
+
+    if langauge_code.split("-")[0].lower() != "cs":
+        language = langauge_code.split("-")[0].lower()
+
     result = {
         "number": idoklad_invoice["DocumentNumber"],
         "variable_symbol": idoklad_invoice["VariableSymbol"],
@@ -165,7 +171,7 @@ def convert_invoice(
         "payment_method": fakturoid_payment_method,
         "currency": idoklad_invoice["Currency"]["Code"],
         "exchange_rate": idoklad_invoice["ExchangeRate"],
-        "language": idoklad_invoice["LanguageCode"].split("-")[1].lower(),
+        "language": language,
         "lines": convert_record_lines(idoklad_invoice['IssuedInvoiceItems']),
     }
 
