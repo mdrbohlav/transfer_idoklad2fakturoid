@@ -1,4 +1,5 @@
 import requests
+from urllib.parse import urlparse, parse_qs
 
 from constants import ERROR_MESSAGES
 
@@ -95,9 +96,14 @@ class FakturoidAPI(object):
                 if header_key in response.headers:
                     cache[type][page]["headers"][cache_headers[header_key]
                                                  ] = response.headers[header_key]
-
-            if "last" in response.links:
-                total_pages = response.links["last"]
+            
+            if total_pages == 1:
+                if "last" in response.links and total_pages == 1:
+                    parsed_url = urlparse(response.links["last"]["url"])
+                    total_pages = int(parse_qs(parsed_url.query)['page'][0])
+                    cache[type]["total_pages"] = total_pages
+                elif "total_pages" in cache[type]:
+                    total_pages = cache[type]["total_pages"]
 
             if response.status_code == 200 or response.status_code == 304:
                 data = []
